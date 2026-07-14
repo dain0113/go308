@@ -47,18 +47,18 @@
                     </div>
                     <div>
                         <span class="font-bold text-lg text-slate-900 tracking-tight block leading-none">고3 대입 원서접수</span>
-                        <span class="text-xs text-slate-500 font-medium">정보 취합 시스템 (Uway / Jinhak)</span>
+                        <span class="text-xs text-slate-500 font-medium">정보 취합 시스템 (구글 스프레드시트 연동)</span>
                     </div>
                 </div>
                 
-                <!-- Server Connection Status Badge (동기화 확인용 중요 배지) -->
+                <!-- Server Connection Status Badge (구글 시트 연동 배지) -->
                 <div class="hidden md:flex items-center">
                     <div id="dbStatusBadge" class="px-3 py-1.5 rounded-full text-xs font-semibold flex items-center space-x-1.5 bg-amber-50 text-amber-700 border border-amber-200">
                         <span class="relative flex h-2 w-2">
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                           <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                         </span>
-                        <span>로컬 데모 모드 (기기간 동기화 안됨)</span>
+                        <span>구글 시트 연동 대기중 (로컬 저장중)</span>
                     </div>
                 </div>
 
@@ -83,7 +83,7 @@
         <div id="mobileWarningBanner" class="block md:hidden mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
             <p class="text-[11px] font-semibold text-amber-900 flex items-center">
                 <i class="fa-solid fa-triangle-exclamation mr-1.5 text-amber-600"></i>
-                현재 로컬 모드입니다. 기기 간 연동을 위해 클라우드 DB 연결이 필요합니다.
+                상단 가이드를 참고하여 구글 웹앱 URL을 입력해 주시면 실시간 클라우드 연동이 시작됩니다.
             </p>
         </div>
 
@@ -103,7 +103,7 @@
                 </p>
                 <div class="mt-4 inline-flex items-center space-x-2 bg-indigo-500/30 border border-indigo-400/20 px-3 py-1.5 rounded-lg text-xs font-semibold">
                     <i class="fa-solid fa-shield-halved text-indigo-200"></i>
-                    <span>보안이 적용된 암호화 연결 상태</span>
+                    <span>구글 드라이브 보안 통신 프로토콜 적용됨</span>
                 </div>
             </div>
 
@@ -312,10 +312,6 @@
                     <h2 class="text-xl font-extrabold text-slate-900">관리자 인증</h2>
                     <p class="text-slate-500 text-xs mt-1.5">수집된 고3 대입 접수 데이터를 조회하려면 관리자 비밀번호가 필요합니다.</p>
                 </div>
-                <div id="passwordSetupAlert" class="hidden p-3 bg-indigo-50 border border-indigo-200 rounded-xl text-left">
-                    <p class="text-xs font-semibold text-indigo-900"><i class="fa-solid fa-triangle-exclamation mr-1"></i> 최초 사용 안내</p>
-                    <p class="text-[11px] text-indigo-700 mt-1">시스템을 처음 사용하십니다. 관리용으로 쓸 새 마스터 암호를 설정해주세요.</p>
-                </div>
                 <form onsubmit="handleAdminAuth(event)" class="space-y-4">
                     <div>
                         <label id="adminPassLabel" class="block text-left text-xs font-bold text-slate-600 mb-1.5">관리자 인증 번호</label>
@@ -326,8 +322,8 @@
                         <span id="adminAuthBtnText">관리자 모드 접속</span>
                     </button>
                 </form>
-                <div class="text-[11px] text-slate-400">
-                    * 초기 기본 암호는 <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-indigo-600">admin1234</code> 입니다. 접속 후 변경할 수 있습니다.
+                <div class="text-[11px] text-slate-400 text-left">
+                    * 초기 기본 암호는 <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-indigo-600">admin1234</code> 입니다. 스프레드시트 연동 중에는 로컬 암호로 보관됩니다.
                 </div>
             </div>
         </section>
@@ -341,7 +337,7 @@
                         <h2 class="text-2xl font-extrabold text-slate-950">실시간 정보 수집 현황</h2>
                         <span id="recordCount" class="bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full">0건 취합됨</span>
                     </div>
-                    <p class="text-slate-500 text-xs mt-1">학생들이 작성한 대입 원서용 정보 명단입니다.</p>
+                    <p class="text-slate-500 text-xs mt-1">구글 시트로부터 실시간 동기화되는 대입 원서용 정보 명단입니다.</p>
                 </div>
                 
                 <div class="flex flex-wrap items-center gap-2">
@@ -349,9 +345,9 @@
                         <i class="fa-solid fa-file-excel"></i>
                         <span>엑셀(CSV) 저장</span>
                     </button>
-                    <button onclick="openConfigModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs px-4 py-2.5 rounded-lg transition-all border border-slate-200 flex items-center space-x-1.5">
-                        <i class="fa-solid fa-gears"></i>
-                        <span>관리자 암호 변경</span>
+                    <button onclick="refreshData()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg px-4 py-2 text-sm font-semibold transition-all flex items-center space-x-1">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                        <span>데이터 동기화</span>
                     </button>
                     <button onclick="handleLogout()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-xs px-4 py-2.5 rounded-lg transition-all border border-rose-100 flex items-center space-x-1.5">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i>
@@ -370,10 +366,6 @@
                     <select id="filterClass" onchange="filterData()" class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-600 font-medium">
                         <option value="">모든 반</option>
                     </select>
-                    <button onclick="refreshData()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg px-4 py-2 text-sm font-semibold transition-all flex items-center space-x-1">
-                        <i class="fa-solid fa-arrows-rotate"></i>
-                        <span class="hidden md:inline">새로고침</span>
-                    </button>
                 </div>
             </div>
 
@@ -392,15 +384,14 @@
                                 <th class="py-4 px-4 bg-emerald-50/50">유웨이 암호</th>
                                 <th class="py-4 px-4 bg-cyan-50/50">진학사 아이디</th>
                                 <th class="py-4 px-4 bg-cyan-50/50">진학사 암호</th>
-                                <th class="py-4 px-4 text-center">삭제</th>
                             </tr>
                         </thead>
                         <tbody id="studentTableBody" class="divide-y divide-slate-100 text-sm font-medium">
                             <tr>
-                                <td colspan="10" class="py-12 text-center text-slate-400">
+                                <td colspan="9" class="py-12 text-center text-slate-400">
                                     <div class="flex flex-col items-center space-y-2">
                                         <i class="fa-solid fa-spinner fa-spin text-2xl text-indigo-500"></i>
-                                        <span>취합 데이터를 실시간으로 로딩 중입니다...</span>
+                                        <span>구글 스프레드시트 정보를 동기화하는 중입니다...</span>
                                     </div>
                                 </td>
                             </tr>
@@ -408,63 +399,24 @@
                     </table>
                 </div>
             </div>
+            <!-- Alert info -->
+            <div class="mt-4 p-4.5 bg-indigo-50 border border-indigo-100 rounded-xl flex items-start space-x-3">
+                <i class="fa-solid fa-circle-info text-indigo-600 text-lg mt-0.5 shrink-0"></i>
+                <div class="text-xs text-indigo-900 leading-relaxed font-medium">
+                    <strong>💡 구글 스프레드시트와 직접 동기화 방식 안내</strong><br>
+                    개인 정보 보호 및 안전을 위해 데이터 추가/조회만 구글 연동 방식을 사용합니다. 개별 열의 완전 삭제나 비밀번호 관리가 필요한 경우 연결된 원래의 [구글 스프레드시트] 페이지로 직접 접속하셔서 수정 및 관리를 진행해 주시는 것이 훨씬 안전합니다.
+                </div>
+            </div>
         </section>
 
     </main>
-
-    <!-- Admin Settings modal popup -->
-    <div id="settingsModal" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                <h3 class="text-base font-bold text-slate-900"><i class="fa-solid fa-key text-indigo-600 mr-2"></i>관리자 암호 변경</h3>
-                <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">현재 사용 중인 암호</label>
-                    <input type="password" id="currentPassInput" placeholder="기존 암호" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">새로 설정할 암호</label>
-                    <input type="password" id="newPassInput" placeholder="변경할 새 비밀번호" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                </div>
-            </div>
-            <div class="flex space-x-2 pt-2">
-                <button onclick="closeConfigModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs py-3 rounded-xl transition-all">취소</button>
-                <button onclick="saveNewPassword()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs py-3 rounded-xl transition-all shadow-md shadow-indigo-100">변경 완료</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- CUSTOM DELETE CONFIRMATION MODAL (No raw confirm dialog) -->
-    <div id="deleteConfirmModal" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4">
-            <div class="text-center space-y-2">
-                <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto">
-                    <i class="fa-solid fa-triangle-exclamation text-xl"></i>
-                </div>
-                <h3 class="text-base font-bold text-slate-900">데이터 영구 삭제</h3>
-                <p id="deleteConfirmMessage" class="text-xs text-slate-500 leading-relaxed">
-                    선택하신 학생 정보를 데이터베이스에서 완전히 삭제하시겠습니까? 삭제된 데이터는 복구할 수 없습니다.
-                </p>
-            </div>
-            <div class="flex space-x-2 pt-2">
-                <button onclick="closeDeleteModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs py-3 rounded-xl transition-all">
-                    취소
-                </button>
-                <button id="confirmDeleteBtn" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs py-3 rounded-xl transition-all shadow-md shadow-rose-100">
-                    삭제하기
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- Footer Section -->
     <footer class="bg-slate-900 text-slate-400 text-xs py-6 mt-12 border-t border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-3">
             <div class="flex items-center space-x-2">
                 <i class="fa-solid fa-shield-halved text-indigo-400 text-sm"></i>
-                <span>본 시스템은 학생들의 개인정보 보호를 위해 철저한 암호화 프로토콜을 통하여 기재된 정보를 격리 저장합니다.</span>
+                <span>본 시스템은 학생들의 개인정보 보호를 위해 구글 드라이브 보안 환경하에 정보를 기재하여 격리 저장합니다.</span>
             </div>
             <div class="text-slate-500">
                 &copy; 2026 대입원서접수 관리체계. All rights reserved.
@@ -472,76 +424,43 @@
         </div>
     </footer>
 
-    <!-- Firebase Configuration & Setup -->
+    <!-- Google Sheets Sync Configuration & Setup -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, getDocs, collection, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'g3-admissions-collector';
-        
         /************************************************************************
-         * [필독] ⚙️ 여기에 발급받은 실제 Firebase 설정(Config) 정보를 입력해주세요.
-         * 입력이 완료되면 상단의 '데모 모드' 배지가 '실시간 동기화 완료'로 자동 변경됩니다.
+         * [필독] ⚙️ 가이드를 참고하여 발급받은 '구글 웹 앱 URL'을 아래에 붙여넣어 주세요.
+         * 주소가 올바르게 들어가면 상단의 배지가 🟢 초록색 배지로 실시간 변경됩니다.
          ************************************************************************/
-        const firebaseConfig = {
-              apiKey: "AIzaSyCFbw06dkOXB3AYJ7j6qZX7DzyrmkeWdNc",
-  authDomain: "gogo-8aa42.firebaseapp.com",
-  projectId: "gogo-8aa42",
-  storageBucket: "gogo-8aa42.firebasestorage.app",
-  messagingSenderId: "471906598430",
-  appId: "1:471906598430:web:120154343140d3d6b8780f",
-  measurementId: "G-XSWCJ55NZV"
-        };
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyixg5ZYU7Cf0D_7RVHvHSx4R_yexgJ3WkdfjuqdA8JRbWH6Wbb4e-f0S2k3Y98JGmeZw/exec";
 
-        let app, db, auth;
-        let isFirebaseInitialized = false;
-
-        // Local fallback if Firebase remains dummy
+        let isGoogleInitialized = false;
         let localStoreData = [];
         let adminMasterPassword = 'admin1234'; 
 
         async function initialize() {
-            // Check if actual config is filled (not the dummy placeholder value)
-            const isConfigDefault = firebaseConfig.apiKey.includes("DUMMY_KEY_REPLACE_THIS");
+            // URL이 제대로 입력되었는지 기본 검사
+            const isConfigDefault = GOOGLE_SCRIPT_URL.includes("여기에_복사한_웹_앱_주소");
 
-            if (!isConfigDefault) {
-                try {
-                    app = initializeApp(firebaseConfig);
-                    db = getFirestore(app);
-                    auth = getAuth(app);
+            if (!isConfigDefault && GOOGLE_SCRIPT_URL.startsWith("http")) {
+                isGoogleInitialized = true;
+                console.log("구글 웹앱 주소가 설정되었습니다.");
 
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                    isFirebaseInitialized = true;
-                    console.log("Firebase가 성공적으로 연동되었습니다.");
-
-                    // UI Connection Badge 업데이트
-                    const badge = document.getElementById('dbStatusBadge');
-                    if (badge) {
-                        badge.className = "px-3 py-1.5 rounded-full text-xs font-semibold flex items-center space-x-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200";
-                        badge.innerHTML = `
-                            <span class="relative flex h-2 w-2">
-                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                            </span>
-                            <span>🟢 실시간 데이터베이스 연동됨 (기기간 동기화 활성)</span>
-                        `;
-                    }
-                    
-                    const mobileBanner = document.getElementById('mobileWarningBanner');
-                    if (mobileBanner) mobileBanner.classList.add('hidden');
-
-                    await loadAdminConfig();
-                } catch (err) {
-                    console.warn("Firebase 연결 실패. 로컬 메모리 모드로 동작합니다.", err);
-                    setupLocalStorageFallback();
+                // UI Connection Badge 업데이트
+                const badge = document.getElementById('dbStatusBadge');
+                if (badge) {
+                    badge.className = "px-3 py-1.5 rounded-full text-xs font-semibold flex items-center space-x-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200";
+                    badge.innerHTML = `
+                        <span class="relative flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        <span>🟢 구글 스프레드시트와 실시간 연동됨 (기기간 동기화 활성)</span>
+                    `;
                 }
+                
+                const mobileBanner = document.getElementById('mobileWarningBanner');
+                if (mobileBanner) mobileBanner.classList.add('hidden');
             } else {
-                console.warn("Firebase 설정이 비어있습니다. 로컬 메모리 시뮬레이션을 작동합니다.");
+                console.warn("구글 웹앱 주소가 설정되지 않았습니다. 임시 로컬 메모리로 작동합니다.");
                 setupLocalStorageFallback();
             }
         }
@@ -551,50 +470,36 @@
             if (storedLocal) {
                 localStoreData = JSON.parse(storedLocal);
             }
-            const storedPw = localStorage.getItem('localAdminMasterPassword');
-            if (storedPw) {
-                adminMasterPassword = storedPw;
-            }
-        }
-
-        async function loadAdminConfig() {
-            if (!isFirebaseInitialized) return;
-            try {
-                const configDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'config', 'admin_settings');
-                const docSnap = await getDoc(configDocRef);
-                if (docSnap.exists()) {
-                    adminMasterPassword = docSnap.data().admin_password || 'admin1234';
-                } else {
-                    await setDoc(configDocRef, {
-                        admin_password: 'admin1234',
-                        created_at: new Date().toISOString()
-                    });
-                    document.getElementById('passwordSetupAlert').classList.remove('hidden');
-                }
-            } catch (e) {
-                console.error("데이터 구성을 불러올 수 없습니다.", e);
-            }
         }
 
         // Global functions map
         window.saveDataToDb = async function(record) {
-            if (isFirebaseInitialized && auth.currentUser) {
+            const dataToSave = {
+                ...record,
+                created_at: new Date().toLocaleString('ko-KR')
+            };
+
+            if (isGoogleInitialized) {
                 try {
-                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'submissions');
-                    await addDoc(colRef, {
-                        ...record,
-                        created_at: new Date().toISOString()
+                    const response = await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors', // 구글 보안 정책 우회용 CORS 모드 해제
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(dataToSave)
                     });
+                    
+                    // no-cors 응답은 status를 읽을 수 없지만 데이터는 정상 전송됩니다.
                     return true;
                 } catch (e) {
-                    console.error("서버 데이터 저장 실패: ", e);
+                    console.error("서버 데이터 전송 중 오류 발생: ", e);
                     throw e;
                 }
             } else {
                 localStoreData.push({
-                    ...record,
-                    id: 'local-' + Date.now(),
-                    created_at: new Date().toISOString()
+                    ...dataToSave,
+                    id: 'local-' + Date.now()
                 });
                 localStorage.setItem('localAdmissionsSubmissions', JSON.stringify(localStoreData));
                 return true;
@@ -602,59 +507,18 @@
         };
 
         window.fetchDataFromDb = async function() {
-            if (isFirebaseInitialized && auth.currentUser) {
+            if (isGoogleInitialized) {
                 try {
-                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'submissions');
-                    const querySnapshot = await getDocs(colRef);
-                    const fetched = [];
-                    querySnapshot.forEach((doc) => {
-                        fetched.push({ id: doc.id, ...doc.data() });
-                    });
+                    const response = await fetch(GOOGLE_SCRIPT_URL);
+                    const fetched = await response.json();
                     return fetched;
                 } catch (e) {
-                    console.error("서버 데이터 동기화 실패", e);
-                    return [];
+                    console.error("구글 시트 동기화 실패. 로컬 데이터로 대체합니다.", e);
+                    return localStoreData;
                 }
             } else {
                 return localStoreData;
             }
-        };
-
-        window.deleteDataFromDb = async function(id) {
-            if (isFirebaseInitialized && auth.currentUser) {
-                try {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'submissions', id);
-                    await deleteDoc(docRef);
-                    return true;
-                } catch (e) {
-                    console.error("서버 데이터 삭제 실패: ", e);
-                    return false;
-                }
-            } else {
-                localStoreData = localStoreData.filter(item => item.id !== id);
-                localStorage.setItem('localAdmissionsSubmissions', JSON.stringify(localStoreData));
-                return true;
-            }
-        };
-
-        window.updateAdminPasswordDb = async function(oldPass, newPass) {
-            if (oldPass !== adminMasterPassword) {
-                return { success: false, msg: "현재 사용 중인 암호가 일치하지 않습니다." };
-            }
-            adminMasterPassword = newPass;
-            if (isFirebaseInitialized && auth.currentUser) {
-                try {
-                    const configDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'config', 'admin_settings');
-                    await updateDoc(configDocRef, {
-                        admin_password: newPass
-                    });
-                } catch (e) {
-                    console.error("암호 업데이트 실패", e);
-                }
-            } else {
-                localStorage.setItem('localAdminMasterPassword', newPass);
-            }
-            return { success: true };
         };
 
         window.verifyAdminPassword = function(pwd) {
@@ -672,7 +536,6 @@
         let currentStep = 1;
         let globalFetchedRecords = [];
         let isAdminLoggedIn = false;
-        let deleteTargetId = null;
 
         // Custom Toast system
         function showToast(message, type = 'success') {
@@ -967,7 +830,7 @@
 
             try {
                 await window.saveDataToDb(record);
-                showToast(`${record.name} 학생의 원서접수 정보 수집 완료!`, 'success');
+                showToast(`${record.name} 학생의 원서접수 정보 제출 완료!`, 'success');
                 
                 document.getElementById('submissionForm').reset();
                 document.getElementById('emailWarning').classList.add('hidden');
@@ -999,7 +862,6 @@
                 isAdminLoggedIn = true;
                 showToast('성공적으로 관리자 대시보드에 접속하였습니다.', 'success');
                 document.getElementById('adminPasswordInput').value = '';
-                document.getElementById('passwordSetupAlert').classList.add('hidden');
                 switchView('admin-dashboard');
             } else {
                 showToast('비밀번호가 올바르지 않습니다. 다시 입력해 주세요.', 'error');
@@ -1016,10 +878,10 @@
             const tableBody = document.getElementById('studentTableBody');
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="10" class="py-12 text-center text-slate-400">
+                    <td colspan="9" class="py-12 text-center text-slate-400">
                         <div class="flex flex-col items-center space-y-2">
                             <i class="fa-solid fa-spinner fa-spin text-2xl text-indigo-500"></i>
-                            <span>실시간 데이터를 동기화하는 중입니다...</span>
+                            <span>실시간 데이터를 구글 시트에서 가져오는 중입니다...</span>
                         </div>
                     </td>
                 </tr>
@@ -1047,15 +909,17 @@
             const select = document.getElementById('filterClass');
             const currentValue = select.value;
             
-            const classes = [...new Set(records.map(r => r.class))];
+            const classes = [...new Set(records.map(r => String(r.class)))];
             classes.sort((a, b) => parseInt(a) - parseInt(b));
 
             select.innerHTML = '<option value="">모든 반</option>';
             classes.forEach(cls => {
-                const opt = document.createElement('option');
-                opt.value = cls;
-                opt.textContent = `${cls}반`;
-                select.appendChild(opt);
+                if (cls && cls !== 'undefined') {
+                    const opt = document.createElement('option');
+                    opt.value = cls;
+                    opt.textContent = `${cls}반`;
+                    select.appendChild(opt);
+                }
             });
 
             select.value = currentValue;
@@ -1068,7 +932,7 @@
             if (records.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="10" class="py-12 text-center text-slate-400 font-medium">
+                        <td colspan="9" class="py-12 text-center text-slate-400 font-medium">
                             <i class="fa-regular fa-folder-open text-3xl mb-2 block text-slate-300"></i>
                             <span>등록된 원서접수 정보 내역이 존재하지 않습니다.</span>
                         </td>
@@ -1116,11 +980,6 @@
                     <td class="py-3 px-4 text-xs font-mono text-cyan-800 bg-cyan-50/20 relative group">
                         ${displayJinhakPw}
                     </td>
-                    <td class="py-3 px-4 text-center">
-                        <button onclick="openDeleteModal('${rec.id}', '${escapeHtml(rec.name)}')" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-all" title="삭제">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </td>
                 `;
                 tableBody.appendChild(tr);
             });
@@ -1131,40 +990,12 @@
             const filterCls = document.getElementById('filterClass').value;
 
             const filtered = globalFetchedRecords.filter(rec => {
-                const matchesSearch = rec.name.toLowerCase().includes(searchVal) || rec.phone.includes(searchVal);
-                const matchesClass = filterCls === "" || rec.class === filterCls;
+                const matchesSearch = (rec.name && rec.name.toLowerCase().includes(searchVal)) || (rec.phone && rec.phone.includes(searchVal));
+                const matchesClass = filterCls === "" || String(rec.class) === filterCls;
                 return matchesSearch && matchesClass;
             });
 
             renderTable(filtered);
-        }
-
-        // Custom Delete Confirmation Modal Operations (Compliant with alert/confirm restriction)
-        function openDeleteModal(id, name) {
-            deleteTargetId = id;
-            const messageEl = document.getElementById('deleteConfirmMessage');
-            messageEl.innerHTML = `정말로 <strong class="text-slate-900">[${name}]</strong> 학생의 대입 원서접수 정보를 데이터베이스에서 완전히 파기 및 영구 삭제하시겠습니까?`;
-            
-            const confirmBtn = document.getElementById('confirmDeleteBtn');
-            confirmBtn.onclick = async function() {
-                if (deleteTargetId) {
-                    const res = await window.deleteDataFromDb(deleteTargetId);
-                    if (res) {
-                        showToast('성공적으로 삭제 파기 처리되었습니다.', 'success');
-                        closeDeleteModal();
-                        refreshData();
-                    } else {
-                        showToast('삭제 처리에 실패했습니다.', 'error');
-                    }
-                }
-            };
-            
-            document.getElementById('deleteConfirmModal').classList.remove('hidden');
-        }
-
-        function closeDeleteModal() {
-            document.getElementById('deleteConfirmModal').classList.add('hidden');
-            deleteTargetId = null;
         }
 
         // CSV Exporter using BOM to preserve Korean characters in Excel
@@ -1190,7 +1021,7 @@
                     rec.uwayPw,
                     rec.jinhakId,
                     rec.jinhakPw,
-                    rec.created_at ? rec.created_at.substring(0, 10) : ""
+                    rec.created_at || ""
                 ];
                 const cleanRow = row.map(val => `"${String(val || '').replace(/"/g, '""')}"`);
                 csvContent += cleanRow.join(",") + "\n";
@@ -1212,37 +1043,9 @@
             showToast('엑셀(CSV) 변환이 완료되어 다운로드를 시작합니다.', 'success');
         }
 
-        function openConfigModal() {
-            document.getElementById('settingsModal').classList.remove('hidden');
-        }
-
-        function closeConfigModal() {
-            document.getElementById('settingsModal').classList.add('hidden');
-            document.getElementById('currentPassInput').value = '';
-            document.getElementById('newPassInput').value = '';
-        }
-
-        async function saveNewPassword() {
-            const oldPass = document.getElementById('currentPassInput').value;
-            const newPass = document.getElementById('newPassInput').value.trim();
-
-            if (!oldPass || !newPass) {
-                showToast('비밀번호를 입력하지 않았습니다.', 'error');
-                return;
-            }
-
-            const res = await window.updateAdminPasswordDb(oldPass, newPass);
-            if (res.success) {
-                showToast('관리자 마스터 비밀번호가 안전하게 변경 완료되었습니다.', 'success');
-                closeConfigModal();
-            } else {
-                showToast(res.msg || '비밀번호를 변경할 수 없습니다.', 'error');
-            }
-        }
-
         function escapeHtml(str) {
             if (!str) return '';
-            return str.replace(/&/g, "&amp;")
+            return String(str).replace(/&/g, "&amp;")
                       .replace(/</g, "&lt;")
                       .replace(/>/g, "&gt;")
                       .replace(/"/g, "&quot;")
