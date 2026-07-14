@@ -50,6 +50,18 @@
                         <span class="text-xs text-slate-500 font-medium">정보 취합 시스템 (Uway / Jinhak)</span>
                     </div>
                 </div>
+                
+                <!-- Server Connection Status Badge (동기화 확인용 중요 배지) -->
+                <div class="hidden md:flex items-center">
+                    <div id="dbStatusBadge" class="px-3 py-1.5 rounded-full text-xs font-semibold flex items-center space-x-1.5 bg-amber-50 text-amber-700 border border-amber-200">
+                        <span class="relative flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                        </span>
+                        <span>로컬 데모 모드 (기기간 동기화 안됨)</span>
+                    </div>
+                </div>
+
                 <div class="flex space-x-2">
                     <button id="navStudentBtn" onclick="switchView('student')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-indigo-50 text-indigo-700 border border-indigo-100 flex items-center space-x-1">
                         <i class="fa-solid fa-user-pen"></i>
@@ -67,6 +79,14 @@
     <!-- Main Content Area -->
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
+        <!-- Connection Warning Banner for Mobile users -->
+        <div id="mobileWarningBanner" class="block md:hidden mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+            <p class="text-[11px] font-semibold text-amber-900 flex items-center">
+                <i class="fa-solid fa-triangle-exclamation mr-1.5 text-amber-600"></i>
+                현재 로컬 모드입니다. 기기 간 연동을 위해 클라우드 DB 연결이 필요합니다.
+            </p>
+        </div>
+
         <!-- Toast Notification Container -->
         <div id="toastContainer" class="fixed top-20 right-4 z-50 space-y-2 pointer-events-none"></div>
 
@@ -117,7 +137,7 @@
                         </h3>
                         
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <!-- Grade (고정 또는 3학년 기본값) -->
+                            <!-- Grade -->
                             <div>
                                 <label class="block text-xs font-bold text-slate-600 mb-1.5">학년 <span class="text-rose-500">*</span></label>
                                 <select id="studentGrade" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium">
@@ -126,12 +146,12 @@
                                     <option value="1">1학년 (참고용)</option>
                                 </select>
                             </div>
-                            <!-- Class (반) -->
+                            <!-- Class -->
                             <div>
                                 <label class="block text-xs font-bold text-slate-600 mb-1.5">반 <span class="text-rose-500">*</span></label>
                                 <input type="number" id="studentClass" required min="1" max="20" placeholder="예: 5" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium">
                             </div>
-                            <!-- Student Number (번호) -->
+                            <!-- Student Number -->
                             <div>
                                 <label class="block text-xs font-bold text-slate-600 mb-1.5">번호 <span class="text-rose-500">*</span></label>
                                 <input type="number" id="studentNum" required min="1" max="40" placeholder="예: 17" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium">
@@ -139,7 +159,7 @@
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <!-- Name (이름) -->
+                            <!-- Name -->
                             <div>
                                 <label class="block text-xs font-bold text-slate-600 mb-1.5">학생 이름 <span class="text-rose-500">*</span></label>
                                 <input type="text" id="studentName" required placeholder="예: 홍길동" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium">
@@ -151,7 +171,7 @@
                             </div>
                         </div>
 
-                        <!-- Resident Registration Number (RRN) -->
+                        <!-- Resident Registration Number -->
                         <div>
                             <label class="block text-xs font-bold text-slate-600 mb-1.5">주민등록번호 (자동 하이픈) <span class="text-rose-500">*</span></label>
                             <input type="text" id="studentRrn" required placeholder="081231-3xxxxxx" maxlength="14" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium">
@@ -176,7 +196,7 @@
                         </div>
                     </div>
 
-                    <!-- STEP 2: Site Selection & Account Details (Merged UI) -->
+                    <!-- STEP 2: Site Selection & Account Details -->
                     <div id="stepContent2" class="space-y-6 hidden">
                         <h3 class="text-lg font-bold text-slate-950 border-b border-slate-100 pb-3 flex items-center">
                             <i class="fa-solid fa-square-check text-indigo-600 mr-2"></i>2. 원서 접수 대행사 및 계정 정보 입력
@@ -376,7 +396,6 @@
                             </tr>
                         </thead>
                         <tbody id="studentTableBody" class="divide-y divide-slate-100 text-sm font-medium">
-                            <!-- JS loaded dynamic contents -->
                             <tr>
                                 <td colspan="10" class="py-12 text-center text-slate-400">
                                     <div class="flex flex-col items-center space-y-2">
@@ -417,6 +436,29 @@
         </div>
     </div>
 
+    <!-- CUSTOM DELETE CONFIRMATION MODAL (No raw confirm dialog) -->
+    <div id="deleteConfirmModal" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4">
+            <div class="text-center space-y-2">
+                <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto">
+                    <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-900">데이터 영구 삭제</h3>
+                <p id="deleteConfirmMessage" class="text-xs text-slate-500 leading-relaxed">
+                    선택하신 학생 정보를 데이터베이스에서 완전히 삭제하시겠습니까? 삭제된 데이터는 복구할 수 없습니다.
+                </p>
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="closeDeleteModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs py-3 rounded-xl transition-all">
+                    취소
+                </button>
+                <button id="confirmDeleteBtn" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs py-3 rounded-xl transition-all shadow-md shadow-rose-100">
+                    삭제하기
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer Section -->
     <footer class="bg-slate-900 text-slate-400 text-xs py-6 mt-12 border-t border-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-3">
@@ -430,63 +472,90 @@
         </div>
     </footer>
 
-    <!-- Firebase core module configuration for dynamic collection & real persistence -->
+    <!-- Firebase Configuration & Setup -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, getDocs, collection, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global state and firebase initial configuration
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'g3-admissions-collector';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "dummy-key-for-standalone-usage",
-            authDomain: "dummy-domain.firebaseapp.com",
-            projectId: "dummy-project",
-            storageBucket: "dummy-bucket.appspot.com",
-            messagingSenderId: "12345",
-            appId: "1-12345-web"
+        
+        /************************************************************************
+         * [필독] ⚙️ 여기에 발급받은 실제 Firebase 설정(Config) 정보를 입력해주세요.
+         * 입력이 완료되면 상단의 '데모 모드' 배지가 '실시간 동기화 완료'로 자동 변경됩니다.
+         ************************************************************************/
+        const firebaseConfig = {
+            apiKey: "DUMMY_KEY_REPLACE_THIS_WITH_YOUR_ACTUAL_KEY", // 실제 값으로 대체해주세요
+            authDomain: "g3-admissions-collector.firebaseapp.com",
+            projectId: "g3-admissions-collector",
+            storageBucket: "g3-admissions-collector.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef123456"
         };
 
         let app, db, auth;
         let isFirebaseInitialized = false;
 
-        // Custom Local fallback if Firebase uses dummy configuration or fails
+        // Local fallback if Firebase remains dummy
         let localStoreData = [];
-        let adminMasterPassword = 'admin1234'; // Default admin password
+        let adminMasterPassword = 'admin1234'; 
 
-        // Initializing logic
         async function initialize() {
-            try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
+            // Check if actual config is filled (not the dummy placeholder value)
+            const isConfigDefault = firebaseConfig.apiKey.includes("DUMMY_KEY_REPLACE_THIS");
 
-                // Authenticate before query logic
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                isFirebaseInitialized = true;
-                console.log("Firebase initialized successfully.");
+            if (!isConfigDefault) {
+                try {
+                    app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
 
-                // Check Admin password setup
-                await loadAdminConfig();
-            } catch (err) {
-                console.warn("Firebase config is local or sandbox. Switching to local in-memory simulation.", err);
-                // Simple load from localStorage for reliable persistence when database lacks setup
-                const storedLocal = localStorage.getItem('localAdmissionsSubmissions');
-                if (storedLocal) {
-                    localStoreData = JSON.parse(storedLocal);
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    isFirebaseInitialized = true;
+                    console.log("Firebase가 성공적으로 연동되었습니다.");
+
+                    // UI Connection Badge 업데이트
+                    const badge = document.getElementById('dbStatusBadge');
+                    if (badge) {
+                        badge.className = "px-3 py-1.5 rounded-full text-xs font-semibold flex items-center space-x-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200";
+                        badge.innerHTML = `
+                            <span class="relative flex h-2 w-2">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                            </span>
+                            <span>🟢 실시간 데이터베이스 연동됨 (기기간 동기화 활성)</span>
+                        `;
+                    }
+                    
+                    const mobileBanner = document.getElementById('mobileWarningBanner');
+                    if (mobileBanner) mobileBanner.classList.add('hidden');
+
+                    await loadAdminConfig();
+                } catch (err) {
+                    console.warn("Firebase 연결 실패. 로컬 메모리 모드로 동작합니다.", err);
+                    setupLocalStorageFallback();
                 }
-                const storedPw = localStorage.getItem('localAdminMasterPassword');
-                if (storedPw) {
-                    adminMasterPassword = storedPw;
-                }
+            } else {
+                console.warn("Firebase 설정이 비어있습니다. 로컬 메모리 시뮬레이션을 작동합니다.");
+                setupLocalStorageFallback();
             }
         }
 
-        // Fetch configured admin settings
+        function setupLocalStorageFallback() {
+            const storedLocal = localStorage.getItem('localAdmissionsSubmissions');
+            if (storedLocal) {
+                localStoreData = JSON.parse(storedLocal);
+            }
+            const storedPw = localStorage.getItem('localAdminMasterPassword');
+            if (storedPw) {
+                adminMasterPassword = storedPw;
+            }
+        }
+
         async function loadAdminConfig() {
             if (!isFirebaseInitialized) return;
             try {
@@ -495,7 +564,6 @@
                 if (docSnap.exists()) {
                     adminMasterPassword = docSnap.data().admin_password || 'admin1234';
                 } else {
-                    // Set default settings if not exists
                     await setDoc(configDocRef, {
                         admin_password: 'admin1234',
                         created_at: new Date().toISOString()
@@ -503,11 +571,11 @@
                     document.getElementById('passwordSetupAlert').classList.remove('hidden');
                 }
             } catch (e) {
-                console.error("Failed to load configuration", e);
+                console.error("데이터 구성을 불러올 수 없습니다.", e);
             }
         }
 
-        // Exposing Firebase Functions via window for legacy HTML access
+        // Global functions map
         window.saveDataToDb = async function(record) {
             if (isFirebaseInitialized && auth.currentUser) {
                 try {
@@ -518,11 +586,10 @@
                     });
                     return true;
                 } catch (e) {
-                    console.error("Firebase save failure: ", e);
+                    console.error("서버 데이터 저장 실패: ", e);
                     throw e;
                 }
             } else {
-                // Fallback store
                 localStoreData.push({
                     ...record,
                     id: 'local-' + Date.now(),
@@ -544,7 +611,7 @@
                     });
                     return fetched;
                 } catch (e) {
-                    console.error("Firebase fetch failed", e);
+                    console.error("서버 데이터 동기화 실패", e);
                     return [];
                 }
             } else {
@@ -559,7 +626,7 @@
                     await deleteDoc(docRef);
                     return true;
                 } catch (e) {
-                    console.error("Firebase delete failure: ", e);
+                    console.error("서버 데이터 삭제 실패: ", e);
                     return false;
                 }
             } else {
@@ -581,7 +648,7 @@
                         admin_password: newPass
                     });
                 } catch (e) {
-                    console.error("Firebase password update failed", e);
+                    console.error("암호 업데이트 실패", e);
                 }
             } else {
                 localStorage.setItem('localAdminMasterPassword', newPass);
@@ -593,19 +660,20 @@
             return pwd === adminMasterPassword;
         };
 
-        // Bootstrapping the app
         window.onload = function() {
             initialize();
-            toggleSiteFields(); // Initialize selected radio states and fields display
+            toggleSiteFields(); 
         }
     </script>
 
+    <!-- UI Operations script -->
     <script>
         let currentStep = 1;
         let globalFetchedRecords = [];
         let isAdminLoggedIn = false;
+        let deleteTargetId = null;
 
-        // Custom alert styling via toast notification
+        // Custom Toast system
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -629,19 +697,17 @@
             
             container.appendChild(toast);
             
-            // Trigger animation
             setTimeout(() => {
                 toast.classList.remove('translate-y-2', 'opacity-0');
             }, 50);
 
-            // Auto dismiss
             setTimeout(() => {
                 toast.classList.add('translate-y-2', 'opacity-0');
                 setTimeout(() => { toast.remove(); }, 300);
             }, 4000);
         }
 
-        // Automatic Formatting inputs for better user experience
+        // Automatic Phone & RRN auto-formatter
         document.getElementById('studentPhone').addEventListener('input', function(e) {
             let val = e.target.value.replace(/[^0-9]/g, '');
             if (val.length > 3 && val.length <= 7) {
@@ -655,13 +721,12 @@
         document.getElementById('studentRrn').addEventListener('input', function(e) {
             let val = e.target.value.replace(/[^0-9]/g, '');
             if (val.length > 6) {
-                // Formatting automatically like XXXXXX-XXXXXXX
                 val = val.substring(0, 6) + '-' + val.substring(6, 13);
             }
             e.target.value = val;
         });
 
-        // Korean input validation on keyup/change
+        // Anti-Korean text validator
         const koreanRegex = /[\uac00-\ud7a3\u1100-\u11ff\u3130-\u318f\ua960-\ua97f\ud7b0-\ud7ff]/;
 
         function checkKoreanRestriction(inputId, warningId) {
@@ -671,7 +736,6 @@
             el.addEventListener('input', function() {
                 if (koreanRegex.test(el.value)) {
                     warn.classList.remove('hidden');
-                    // Remove Korean letters
                     el.value = el.value.replace(koreanRegex, '');
                 } else {
                     warn.classList.add('hidden');
@@ -685,7 +749,7 @@
         checkKoreanRestriction('jinhakId', 'jinhakIdWarning');
         checkKoreanRestriction('jinhakPw', 'jinhakPwWarning');
 
-        // Confirm fields monitoring real-time mismatches
+        // Real-time mismatch checkers
         document.getElementById('uwayPwConfirm').addEventListener('input', function() {
             const pw = document.getElementById('uwayPw').value;
             const confirm = document.getElementById('uwayPwConfirm').value;
@@ -708,7 +772,6 @@
             }
         });
 
-        // Dynamic Field Toggling based on Radio selection
         function toggleSiteFields() {
             const selected = document.querySelector('input[name="siteType"]:checked').value;
             const uwayFields = document.getElementById('uwayFields');
@@ -717,7 +780,6 @@
             const labelJinhak = document.getElementById('labelJinhak');
             const labelBoth = document.getElementById('labelBoth');
 
-            // Reset label classes to default unselected style
             const defaultLabelClass = "border border-slate-200 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer hover:bg-indigo-50/30 transition-all duration-200";
             const selectedLabelClass = "border-2 border-indigo-500 bg-indigo-50/30 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer transition-all duration-200 shadow-sm";
 
@@ -740,7 +802,6 @@
             }
         }
 
-        // Nav views switcher
         function switchView(target) {
             document.getElementById('studentView').classList.add('hidden');
             document.getElementById('adminLoginView').classList.add('hidden');
@@ -766,15 +827,12 @@
             }
         }
 
-        // Multi-step Navigation
         function goToStep(step) {
             currentStep = step;
             
-            // Hide all contents
             document.getElementById('stepContent1').classList.add('hidden');
             document.getElementById('stepContent2').classList.add('hidden');
 
-            // Reset dots style
             const dots = ['stepDot1', 'stepDot2'];
             dots.forEach((dotId, index) => {
                 const num = index + 1;
@@ -795,16 +853,13 @@
                 }
             });
 
-            // Update Progress Line width
             const progressPercent = ((step - 1) / 1) * 100;
             document.getElementById('progressBar').style.width = `${progressPercent}%`;
 
-            // Show appropriate step content
             document.getElementById(`stepContent${step}`).classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Validate steps sequentially
         function validateAndGoToStep(targetStep) {
             if (targetStep === 2) {
                 const grade = document.getElementById('studentGrade').value;
@@ -820,7 +875,6 @@
                     return;
                 }
                 
-                // Form validations
                 if (!phone.match(/^01[016789]-\d{3,4}-\d{4}$/)) {
                     showToast('유효한 전화번호 형식(010-XXXX-XXXX)이 아닙니다.', 'error');
                     return;
@@ -838,7 +892,6 @@
             }
         }
 
-        // Student submission controller
         async function handleFormSubmit(e) {
             e.preventDefault();
 
@@ -850,7 +903,6 @@
             let jinhakId = "";
             let jinhakPw = "";
 
-            // Conditional Validation based on Selected Site Option
             if (siteType === 'uway' || siteType === 'both') {
                 uwayId = document.getElementById('uwayId').value.trim();
                 uwayPw = document.getElementById('uwayPw').value;
@@ -898,7 +950,6 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>제출 처리 중...</span>`;
 
-            // Prepare record
             const record = {
                 grade: document.getElementById('studentGrade').value,
                 class: document.getElementById('studentClass').value,
@@ -917,7 +968,6 @@
                 await window.saveDataToDb(record);
                 showToast(`${record.name} 학생의 원서접수 정보 수집 완료!`, 'success');
                 
-                // Form reset & transitions
                 document.getElementById('submissionForm').reset();
                 document.getElementById('emailWarning').classList.add('hidden');
                 document.getElementById('uwayIdWarning').classList.add('hidden');
@@ -927,14 +977,12 @@
                 document.getElementById('jinhakPwWarning').classList.add('hidden');
                 document.getElementById('jinhakPwMismatch').classList.add('hidden');
 
-                // Enforce default site toggle status on reset
                 document.querySelector('input[name="siteType"][value="uway"]').checked = true;
                 toggleSiteFields();
 
-                // Return back to first Step
                 goToStep(1);
             } catch (err) {
-                showToast('저장 중 오류가 발생했습니다. 다시 시도해 주세요.', 'error');
+                showToast('저장 중 오류가 발생했습니다. 네트워크 환경을 확인하고 다시 시도해 주세요.', 'error');
                 console.error(err);
             } finally {
                 submitBtn.disabled = false;
@@ -942,7 +990,6 @@
             }
         }
 
-        // Admin Auth handling
         function handleAdminAuth(e) {
             e.preventDefault();
             const rawPass = document.getElementById('adminPasswordInput').value;
@@ -964,7 +1011,6 @@
             switchView('student');
         }
 
-        // Refreshes submissions list from Firestore
         async function refreshData() {
             const tableBody = document.getElementById('studentTableBody');
             tableBody.innerHTML = `
@@ -981,7 +1027,6 @@
             try {
                 const docs = await window.fetchDataFromDb();
                 
-                // Sort by Grade ascending, Class ascending, Student Number ascending
                 docs.sort((a, b) => {
                     if (parseInt(a.grade) !== parseInt(b.grade)) return parseInt(a.grade) - parseInt(b.grade);
                     if (parseInt(a.class) !== parseInt(b.class)) return parseInt(a.class) - parseInt(b.class);
@@ -990,7 +1035,6 @@
 
                 globalFetchedRecords = docs;
                 
-                // Populate Filters
                 updateClassFilterOptions(docs);
                 renderTable(docs);
             } catch (e) {
@@ -998,12 +1042,10 @@
             }
         }
 
-        // Update dropdown menu items for filter
         function updateClassFilterOptions(records) {
             const select = document.getElementById('filterClass');
             const currentValue = select.value;
             
-            // Extract unique class numbers
             const classes = [...new Set(records.map(r => r.class))];
             classes.sort((a, b) => parseInt(a) - parseInt(b));
 
@@ -1015,11 +1057,9 @@
                 select.appendChild(opt);
             });
 
-            // Restore selection if possible
             select.value = currentValue;
         }
 
-        // Dynamic table list rendering
         function renderTable(records) {
             const tableBody = document.getElementById('studentTableBody');
             document.getElementById('recordCount').textContent = `${records.length}건 취합됨`;
@@ -1041,7 +1081,6 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition-colors duration-150 border-b border-slate-100";
                 
-                // Optional Field Handling with customized placeholders in UI
                 const displayUwayId = rec.uwayId ? escapeHtml(rec.uwayId) : '<span class="text-slate-400 italic font-normal text-xs">미제출</span>';
                 const displayUwayPw = rec.uwayPw ? `<span class="password-text select-all">${escapeHtml(rec.uwayPw)}</span>` : '<span class="text-slate-400 italic font-normal text-xs">-</span>';
                 
@@ -1077,7 +1116,7 @@
                         ${displayJinhakPw}
                     </td>
                     <td class="py-3 px-4 text-center">
-                        <button onclick="handleDeleteRow('${rec.id}', '${escapeHtml(rec.name)}')" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-all" title="삭제">
+                        <button onclick="openDeleteModal('${rec.id}', '${escapeHtml(rec.name)}')" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-all" title="삭제">
                             <i class="fa-solid fa-trash-can"></i>
                         </button>
                     </td>
@@ -1086,7 +1125,6 @@
             });
         }
 
-        // Filter and Search functions
         function filterData() {
             const searchVal = document.getElementById('searchName').value.toLowerCase();
             const filterCls = document.getElementById('filterClass').value;
@@ -1100,28 +1138,42 @@
             renderTable(filtered);
         }
 
-        // Delete verification and processing (Safely customized instead of alerts)
-        async function handleDeleteRow(id, name) {
-            const isConfirmed = confirm(`정말로 [${name}] 학생의 소중한 정보를 리스트에서 완전히 파기 및 영구 삭제하시겠습니까?`);
-            if (isConfirmed) {
-                const res = await window.deleteDataFromDb(id);
-                if (res) {
-                    showToast('성공적으로 삭제 파기 처리되었습니다.', 'success');
-                    refreshData();
-                } else {
-                    showToast('삭제 처리에 실패했습니다.', 'error');
+        // Custom Delete Confirmation Modal Operations (Compliant with alert/confirm restriction)
+        function openDeleteModal(id, name) {
+            deleteTargetId = id;
+            const messageEl = document.getElementById('deleteConfirmMessage');
+            messageEl.innerHTML = `정말로 <strong class="text-slate-900">[${name}]</strong> 학생의 대입 원서접수 정보를 데이터베이스에서 완전히 파기 및 영구 삭제하시겠습니까?`;
+            
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            confirmBtn.onclick = async function() {
+                if (deleteTargetId) {
+                    const res = await window.deleteDataFromDb(deleteTargetId);
+                    if (res) {
+                        showToast('성공적으로 삭제 파기 처리되었습니다.', 'success');
+                        closeDeleteModal();
+                        refreshData();
+                    } else {
+                        showToast('삭제 처리에 실패했습니다.', 'error');
+                    }
                 }
-            }
+            };
+            
+            document.getElementById('deleteConfirmModal').classList.remove('hidden');
         }
 
-        // Excel Exporting (BOM UTF-8 CSV generation)
+        function closeDeleteModal() {
+            document.getElementById('deleteConfirmModal').classList.add('hidden');
+            deleteTargetId = null;
+        }
+
+        // CSV Exporter using BOM to preserve Korean characters in Excel
         function exportToExcel() {
             if (globalFetchedRecords.length === 0) {
                 showToast('엑셀로 추출할 수 있는 데이터가 존재하지 않습니다.', 'warning');
                 return;
             }
 
-            let csvContent = "\ufeff"; // BOM inclusion for Excel Korean compatibility
+            let csvContent = "\ufeff"; 
             csvContent += "학년,반,번호,이름,전화번호,주민등록번호,주사용 이메일,유웨이 ID,유웨이 비밀번호,진학사 ID,진학사 비밀번호,등록일\n";
 
             globalFetchedRecords.forEach(rec => {
@@ -1139,7 +1191,6 @@
                     rec.jinhakPw,
                     rec.created_at ? rec.created_at.substring(0, 10) : ""
                 ];
-                // Strip commas from input to avoid format errors
                 const cleanRow = row.map(val => `"${String(val || '').replace(/"/g, '""')}"`);
                 csvContent += cleanRow.join(",") + "\n";
             });
@@ -1157,10 +1208,9 @@
             link.click();
             document.body.removeChild(link);
             
-            showToast('엑셀로 정상적으로 변환되어 저장이 시작됩니다.', 'success');
+            showToast('엑셀(CSV) 변환이 완료되어 다운로드를 시작합니다.', 'success');
         }
 
-        // Password modification modal commands
         function openConfigModal() {
             document.getElementById('settingsModal').classList.remove('hidden');
         }
@@ -1189,7 +1239,6 @@
             }
         }
 
-        // Clean safety wrapper helper
         function escapeHtml(str) {
             if (!str) return '';
             return str.replace(/&/g, "&amp;")
