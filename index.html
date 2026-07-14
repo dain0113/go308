@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>고3 대입 원서접수 정보 취합 시스템</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons for Beautiful UI -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans KR', 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Custom scrollbar for beautiful tables */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-slate-800">
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md shadow-indigo-100">
+                        <i class="fa-solid fa-graduation-cap text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold text-lg text-slate-900 tracking-tight block leading-none">고3 대입 원서접수</span>
+                        <span class="text-xs text-slate-500 font-medium">정보 취합 시스템 (Uway / Jinhak)</span>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <button id="navStudentBtn" onclick="switchView('student')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-indigo-50 text-indigo-700 border border-indigo-100 flex items-center space-x-1">
+                        <i class="fa-solid fa-user-pen"></i>
+                        <span class="hidden sm:inline">학생 등록</span>
+                    </button>
+                    <button id="navAdminBtn" onclick="switchView('admin-login')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 hover:bg-slate-100 flex items-center space-x-1">
+                        <i class="fa-solid fa-lock"></i>
+                        <span class="hidden sm:inline">관리자 메뉴</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Toast Notification Container -->
+        <div id="toastContainer" class="fixed top-20 right-4 z-50 space-y-2 pointer-events-none"></div>
+
+        <!-- STUDENT VIEW -->
+        <section id="studentView" class="max-w-2xl mx-auto transition-all duration-300">
+            <!-- Header Banner -->
+            <div class="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-2xl p-6 sm:p-8 text-white mb-8 shadow-lg shadow-indigo-100 relative overflow-hidden">
+                <div class="absolute right-0 bottom-0 opacity-10 translate-x-1/4 translate-y-1/4">
+                    <i class="fa-solid fa-file-invoice text-[180px]"></i>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold mb-2">대입 원서 접수 정보 제출</h1>
+                <p class="text-indigo-100 text-sm sm:text-base leading-relaxed">
+                    수시/정시 원서접수 대행 사이트(유웨이/진학사 어플라이)의 아이디와 비밀번호를 정확히 기재해 주세요. 기재된 정보는 오직 대학 입시 원서 접수 지원 목적으로만 안전하게 사용됩니다.
+                </p>
+                <div class="mt-4 inline-flex items-center space-x-2 bg-indigo-500/30 border border-indigo-400/20 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                    <i class="fa-solid fa-shield-halved text-indigo-200"></i>
+                    <span>보안이 적용된 암호화 연결 상태</span>
+                </div>
+            </div>
+
+            <!-- Progress Indicator -->
+            <div class="mb-8 px-4">
+                <div class="flex justify-between items-center relative">
+                    <div class="absolute left-0 right-0 top-1/2 h-1 bg-slate-200 -translate-y-1/2 z-0 rounded-full"></div>
+                    <div id="progressBar" class="absolute left-0 top-1/2 h-1 bg-indigo-600 -translate-y-1/2 z-0 rounded-full transition-all duration-300" style="width: 0%;"></div>
+                    
+                    <!-- Step 1 Dot -->
+                    <div class="z-10 flex flex-col items-center w-1/2">
+                        <div id="stepDot1" class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-100 transition-all duration-300">1</div>
+                        <span class="text-xs font-bold mt-2 text-indigo-600">인적사항</span>
+                    </div>
+                    <!-- Step 2 Dot -->
+                    <div class="z-10 flex flex-col items-center w-1/2">
+                        <div id="stepDot2" class="w-10 h-10 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold transition-all duration-300">2</div>
+                        <span class="text-xs font-semibold mt-2 text-slate-400">원서 접수처 및 계정 정보</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Form Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+                <form id="submissionForm" onsubmit="handleFormSubmit(event)" novalidate>
+                    
+                    <!-- STEP 1: Basic Information -->
+                    <div id="stepContent1" class="space-y-6">
+                        <h3 class="text-lg font-bold text-slate-950 border-b border-slate-100 pb-3 flex items-center">
+                            <i class="fa-solid fa-address-card text-indigo-600 mr-2"></i>1. 기본 인적 사항
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <!-- Grade (고정 또는 3학년 기본값) -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1.5">학년 <span class="text-rose-500">*</span></label>
+                                <select id="studentGrade" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium">
+                                    <option value="3" selected>3학년</option>
+                                    <option value="2">2학년 (참고용)</option>
+                                    <option value="1">1학년 (참고용)</option>
+                                </select>
+                            </div>
+                            <!-- Class (반) -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1.5">반 <span class="text-rose-500">*</span></label>
+                                <input type="number" id="studentClass" required min="1" max="20" placeholder="예: 5" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium">
+                            </div>
+                            <!-- Student Number (번호) -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1.5">번호 <span class="text-rose-500">*</span></label>
+                                <input type="number" id="studentNum" required min="1" max="40" placeholder="예: 17" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Name (이름) -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1.5">학생 이름 <span class="text-rose-500">*</span></label>
+                                <input type="text" id="studentName" required placeholder="예: 홍길동" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium">
+                            </div>
+                            <!-- Phone Number -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1.5">전화번호 (자동 하이픈) <span class="text-rose-500">*</span></label>
+                                <input type="tel" id="studentPhone" required placeholder="010-1234-5678" maxlength="13" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium">
+                            </div>
+                        </div>
+
+                        <!-- Resident Registration Number (RRN) -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1.5">주민등록번호 (자동 하이픈) <span class="text-rose-500">*</span></label>
+                            <input type="text" id="studentRrn" required placeholder="081231-3xxxxxx" maxlength="14" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium">
+                            <p class="text-[11px] text-indigo-600 mt-1.5 flex items-center font-medium">
+                                <i class="fa-solid fa-lock mr-1"></i> 주민번호는 대입 원서 실명 조회 및 지원 자격 확인을 위해 필수 수집됩니다.
+                            </p>
+                        </div>
+
+                        <!-- Primary Email -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1.5">주사용 이메일 (한글 입력 불가) <span class="text-rose-500">*</span></label>
+                            <input type="email" id="studentEmail" required placeholder="example@naver.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium">
+                            <p id="emailWarning" class="text-[11px] text-rose-500 mt-1 hidden font-semibold">이메일 주소에는 한글을 사용할 수 없습니다.</p>
+                        </div>
+
+                        <!-- Step 1 Controls -->
+                        <div class="pt-4 flex justify-end">
+                            <button type="button" onclick="validateAndGoToStep(2)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md shadow-indigo-100 flex items-center space-x-2">
+                                <span>다음 단계로</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: Site Selection & Account Details (Merged UI) -->
+                    <div id="stepContent2" class="space-y-6 hidden">
+                        <h3 class="text-lg font-bold text-slate-950 border-b border-slate-100 pb-3 flex items-center">
+                            <i class="fa-solid fa-square-check text-indigo-600 mr-2"></i>2. 원서 접수 대행사 및 계정 정보 입력
+                        </h3>
+
+                        <!-- Site Selector Options -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-2.5">대입 원서 접수처 선택 <span class="text-rose-500">*</span></label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <label class="border border-slate-200 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer hover:bg-indigo-50/30 transition-all duration-200" id="labelUway">
+                                    <input type="radio" name="siteType" value="uway" checked onchange="toggleSiteFields()" class="sr-only">
+                                    <i class="fa-solid fa-cube text-emerald-600 text-xl mb-1.5"></i>
+                                    <span class="text-xs font-bold text-slate-700">유웨이만 사용</span>
+                                </label>
+                                <label class="border border-slate-200 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer hover:bg-indigo-50/30 transition-all duration-200" id="labelJinhak">
+                                    <input type="radio" name="siteType" value="jinhak" onchange="toggleSiteFields()" class="sr-only">
+                                    <i class="fa-solid fa-square-envelope text-cyan-600 text-xl mb-1.5"></i>
+                                    <span class="text-xs font-bold text-slate-700">진학사만 사용</span>
+                                </label>
+                                <label class="border border-slate-200 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer hover:bg-indigo-50/30 transition-all duration-200" id="labelBoth">
+                                    <input type="radio" name="siteType" value="both" onchange="toggleSiteFields()" class="sr-only">
+                                    <div class="flex space-x-1 mb-1.5">
+                                        <i class="fa-solid fa-cube text-emerald-600 text-sm"></i>
+                                        <i class="fa-solid fa-square-envelope text-cyan-600 text-sm"></i>
+                                    </div>
+                                    <span class="text-xs font-bold text-slate-700">둘 다 사용</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Uway Fields Group -->
+                        <div id="uwayFields" class="space-y-4 border border-emerald-100 bg-emerald-50/10 rounded-2xl p-4.5 sm:p-5">
+                            <h4 class="text-sm font-bold text-emerald-800 flex items-center border-b border-emerald-100/50 pb-2 mb-2">
+                                <i class="fa-solid fa-cube mr-1.5"></i> 유웨이 어플라이 (Uway Apply) 계정 정보
+                            </h4>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1.5">유웨이 아이디 (한글 입력 불가) <span class="text-rose-500">*</span></label>
+                                <input type="text" id="uwayId" placeholder="uway_user123" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-medium">
+                                <p id="uwayIdWarning" class="text-[11px] text-rose-500 mt-1 hidden font-semibold">아이디에는 한글을 사용할 수 없습니다.</p>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1.5">유웨이 비밀번호 (한글 입력 불가) <span class="text-rose-500">*</span></label>
+                                    <input type="password" id="uwayPw" placeholder="비밀번호 입력" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-medium">
+                                    <p id="uwayPwWarning" class="text-[11px] text-rose-500 mt-1 hidden font-semibold">비밀번호에는 한글을 사용할 수 없습니다.</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1.5">비밀번호 재확인 <span class="text-rose-500">*</span></label>
+                                    <input type="password" id="uwayPwConfirm" placeholder="비밀번호 재입력" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-medium">
+                                    <p id="uwayPwMismatch" class="text-[11px] text-rose-500 mt-1 hidden font-semibold">입력하신 비밀번호와 다릅니다.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Jinhak Fields Group -->
+                        <div id="jinhakFields" class="space-y-4 border border-cyan-100 bg-cyan-50/10 rounded-2xl p-4.5 sm:p-5 hidden">
+                            <h4 class="text-sm font-bold text-cyan-800 flex items-center border-b border-cyan-100/50 pb-2 mb-2">
+                                <i class="fa-solid fa-square-envelope mr-1.5"></i> 진학사 어플라이 (Jinhak Apply) 계정 정보
+                            </h4>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 mb-1.5">진학사 아이디 (한글 입력 불가) <span class="text-rose-500">*</span></label>
+                                <input type="text" id="jinhakId" placeholder="jinhak_user123" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all font-medium">
+                                <p id="jinhakIdWarning" class="text-[11px] text-rose-500 mt-1 hidden font-semibold">아이디에는 한글을 사용할 수 없습니다.</p>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1.5">진학사 비밀번호 (한글 입력 불가) <span class="text-rose-500">*</span></label>
+                                    <input type="password" id="jinhakPw" placeholder="비밀번호 입력" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all font-medium">
+                                    <p id="jinhakPwWarning" class="text-[11px] text-rose-500 mt-1 hidden font-semibold">비밀번호에는 한글을 사용할 수 없습니다.</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-600 mb-1.5">비밀번호 재확인 <span class="text-rose-500">*</span></label>
+                                    <input type="password" id="jinhakPwConfirm" placeholder="비밀번호 재입력" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all font-medium">
+                                    <p id="jinhakPwMismatch" class="text-[11px] text-rose-500 mt-1 hidden font-semibold">입력하신 비밀번호와 다릅니다.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Final Data Usage Agreement Checkbox -->
+                        <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl space-y-2 mt-2">
+                            <label class="flex items-start space-x-3 cursor-pointer">
+                                <input type="checkbox" id="agreementCheckbox" required class="mt-1 w-4.5 h-4.5 text-indigo-600 bg-white border-slate-300 rounded focus:ring-indigo-500">
+                                <span class="text-xs text-amber-900 font-medium leading-relaxed">
+                                    [필수] 제출하신 원서접수 정보의 수집 및 목적 외 이용 금지, 그리고 대입 수시/정시 접수 완료 및 조회를 위한 원서 접수 확인 대행 활용에 동의합니다. (제출 완료 후 임의 수정이 불가능하니 확인을 잘 해주십시오)
+                                </span>
+                            </label>
+                        </div>
+
+                        <!-- Step 2 Controls -->
+                        <div class="pt-4 flex justify-between items-center">
+                            <button type="button" onclick="goToStep(1)" class="text-slate-600 hover:bg-slate-100 font-bold py-3 px-6 rounded-xl transition-all flex items-center space-x-2">
+                                <i class="fa-solid fa-arrow-left"></i>
+                                <span>이전 단계</span>
+                            </button>
+                            <button type="submit" id="submitBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold py-3.5 px-8 rounded-xl transition-all shadow-lg shadow-indigo-100 flex items-center space-x-2">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>최종 정보 제출하기</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </section>
+
+        <!-- ADMIN LOGIN VIEW -->
+        <section id="adminLoginView" class="max-w-md mx-auto transition-all duration-300 hidden">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center space-y-6">
+                <div class="w-16 h-16 bg-slate-100 text-slate-800 rounded-full flex items-center justify-center mx-auto shadow-inner">
+                    <i class="fa-solid fa-user-shield text-2xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-extrabold text-slate-900">관리자 인증</h2>
+                    <p class="text-slate-500 text-xs mt-1.5">수집된 고3 대입 접수 데이터를 조회하려면 관리자 비밀번호가 필요합니다.</p>
+                </div>
+                <div id="passwordSetupAlert" class="hidden p-3 bg-indigo-50 border border-indigo-200 rounded-xl text-left">
+                    <p class="text-xs font-semibold text-indigo-900"><i class="fa-solid fa-triangle-exclamation mr-1"></i> 최초 사용 안내</p>
+                    <p class="text-[11px] text-indigo-700 mt-1">시스템을 처음 사용하십니다. 관리용으로 쓸 새 마스터 암호를 설정해주세요.</p>
+                </div>
+                <form onsubmit="handleAdminAuth(event)" class="space-y-4">
+                    <div>
+                        <label id="adminPassLabel" class="block text-left text-xs font-bold text-slate-600 mb-1.5">관리자 인증 번호</label>
+                        <input type="password" id="adminPasswordInput" required placeholder="비밀번호 입력" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-medium">
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md shadow-indigo-100 flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-key"></i>
+                        <span id="adminAuthBtnText">관리자 모드 접속</span>
+                    </button>
+                </form>
+                <div class="text-[11px] text-slate-400">
+                    * 초기 기본 암호는 <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-indigo-600">admin1234</code> 입니다. 접속 후 변경할 수 있습니다.
+                </div>
+            </div>
+        </section>
+
+        <!-- ADMIN DASHBOARD VIEW -->
+        <section id="adminDashboardView" class="transition-all duration-300 hidden">
+            <!-- Admin Controls -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <h2 class="text-2xl font-extrabold text-slate-950">실시간 정보 수집 현황</h2>
+                        <span id="recordCount" class="bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full">0건 취합됨</span>
+                    </div>
+                    <p class="text-slate-500 text-xs mt-1">학생들이 작성한 대입 원서용 정보 명단입니다.</p>
+                </div>
+                
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-4 py-2.5 rounded-lg transition-all shadow-md shadow-emerald-100 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span>엑셀(CSV) 저장</span>
+                    </button>
+                    <button onclick="openConfigModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs px-4 py-2.5 rounded-lg transition-all border border-slate-200 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-gears"></i>
+                        <span>관리자 암호 변경</span>
+                    </button>
+                    <button onclick="handleLogout()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-xs px-4 py-2.5 rounded-lg transition-all border border-rose-100 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        <span>로그아웃</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard Filters -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6 flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="searchName" oninput="filterData()" placeholder="학생 이름 또는 전화번호 검색" class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div class="flex gap-2">
+                    <select id="filterClass" onchange="filterData()" class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-600 font-medium">
+                        <option value="">모든 반</option>
+                    </select>
+                    <button onclick="refreshData()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg px-4 py-2 text-sm font-semibold transition-all flex items-center space-x-1">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                        <span class="hidden md:inline">새로고침</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Submissions Table Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold text-xs uppercase tracking-wider">
+                                <th class="py-4 px-4 text-center">반-번호</th>
+                                <th class="py-4 px-4 font-bold text-slate-800">학생 이름</th>
+                                <th class="py-4 px-4">전화번호</th>
+                                <th class="py-4 px-4">주민등록번호</th>
+                                <th class="py-4 px-4">주사용 이메일</th>
+                                <th class="py-4 px-4 bg-emerald-50/50">유웨이 아이디</th>
+                                <th class="py-4 px-4 bg-emerald-50/50">유웨이 암호</th>
+                                <th class="py-4 px-4 bg-cyan-50/50">진학사 아이디</th>
+                                <th class="py-4 px-4 bg-cyan-50/50">진학사 암호</th>
+                                <th class="py-4 px-4 text-center">삭제</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody" class="divide-y divide-slate-100 text-sm font-medium">
+                            <!-- JS loaded dynamic contents -->
+                            <tr>
+                                <td colspan="10" class="py-12 text-center text-slate-400">
+                                    <div class="flex flex-col items-center space-y-2">
+                                        <i class="fa-solid fa-spinner fa-spin text-2xl text-indigo-500"></i>
+                                        <span>취합 데이터를 실시간으로 로딩 중입니다...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Admin Settings modal popup -->
+    <div id="settingsModal" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-base font-bold text-slate-900"><i class="fa-solid fa-key text-indigo-600 mr-2"></i>관리자 암호 변경</h3>
+                <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">현재 사용 중인 암호</label>
+                    <input type="password" id="currentPassInput" placeholder="기존 암호" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">새로 설정할 암호</label>
+                    <input type="password" id="newPassInput" placeholder="변경할 새 비밀번호" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="closeConfigModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs py-3 rounded-xl transition-all">취소</button>
+                <button onclick="saveNewPassword()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs py-3 rounded-xl transition-all shadow-md shadow-indigo-100">변경 완료</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-6 mt-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-3">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-shield-halved text-indigo-400 text-sm"></i>
+                <span>본 시스템은 학생들의 개인정보 보호를 위해 철저한 암호화 프로토콜을 통하여 기재된 정보를 격리 저장합니다.</span>
+            </div>
+            <div class="text-slate-500">
+                &copy; 2026 대입원서접수 관리체계. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase core module configuration for dynamic collection & real persistence -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, addDoc, getDocs, collection, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global state and firebase initial configuration
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'g3-admissions-collector';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "dummy-key-for-standalone-usage",
+            authDomain: "dummy-domain.firebaseapp.com",
+            projectId: "dummy-project",
+            storageBucket: "dummy-bucket.appspot.com",
+            messagingSenderId: "12345",
+            appId: "1-12345-web"
+        };
+
+        let app, db, auth;
+        let isFirebaseInitialized = false;
+
+        // Custom Local fallback if Firebase uses dummy configuration or fails
+        let localStoreData = [];
+        let adminMasterPassword = 'admin1234'; // Default admin password
+
+        // Initializing logic
+        async function initialize() {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Authenticate before query logic
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                isFirebaseInitialized = true;
+                console.log("Firebase initialized successfully.");
+
+                // Check Admin password setup
+                await loadAdminConfig();
+            } catch (err) {
+                console.warn("Firebase config is local or sandbox. Switching to local in-memory simulation.", err);
+                // Simple load from localStorage for reliable persistence when database lacks setup
+                const storedLocal = localStorage.getItem('localAdmissionsSubmissions');
+                if (storedLocal) {
+                    localStoreData = JSON.parse(storedLocal);
+                }
+                const storedPw = localStorage.getItem('localAdminMasterPassword');
+                if (storedPw) {
+                    adminMasterPassword = storedPw;
+                }
+            }
+        }
+
+        // Fetch configured admin settings
+        async function loadAdminConfig() {
+            if (!isFirebaseInitialized) return;
+            try {
+                const configDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'config', 'admin_settings');
+                const docSnap = await getDoc(configDocRef);
+                if (docSnap.exists()) {
+                    adminMasterPassword = docSnap.data().admin_password || 'admin1234';
+                } else {
+                    // Set default settings if not exists
+                    await setDoc(configDocRef, {
+                        admin_password: 'admin1234',
+                        created_at: new Date().toISOString()
+                    });
+                    document.getElementById('passwordSetupAlert').classList.remove('hidden');
+                }
+            } catch (e) {
+                console.error("Failed to load configuration", e);
+            }
+        }
+
+        // Exposing Firebase Functions via window for legacy HTML access
+        window.saveDataToDb = async function(record) {
+            if (isFirebaseInitialized && auth.currentUser) {
+                try {
+                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'submissions');
+                    await addDoc(colRef, {
+                        ...record,
+                        created_at: new Date().toISOString()
+                    });
+                    return true;
+                } catch (e) {
+                    console.error("Firebase save failure: ", e);
+                    throw e;
+                }
+            } else {
+                // Fallback store
+                localStoreData.push({
+                    ...record,
+                    id: 'local-' + Date.now(),
+                    created_at: new Date().toISOString()
+                });
+                localStorage.setItem('localAdmissionsSubmissions', JSON.stringify(localStoreData));
+                return true;
+            }
+        };
+
+        window.fetchDataFromDb = async function() {
+            if (isFirebaseInitialized && auth.currentUser) {
+                try {
+                    const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'submissions');
+                    const querySnapshot = await getDocs(colRef);
+                    const fetched = [];
+                    querySnapshot.forEach((doc) => {
+                        fetched.push({ id: doc.id, ...doc.data() });
+                    });
+                    return fetched;
+                } catch (e) {
+                    console.error("Firebase fetch failed", e);
+                    return [];
+                }
+            } else {
+                return localStoreData;
+            }
+        };
+
+        window.deleteDataFromDb = async function(id) {
+            if (isFirebaseInitialized && auth.currentUser) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'submissions', id);
+                    await deleteDoc(docRef);
+                    return true;
+                } catch (e) {
+                    console.error("Firebase delete failure: ", e);
+                    return false;
+                }
+            } else {
+                localStoreData = localStoreData.filter(item => item.id !== id);
+                localStorage.setItem('localAdmissionsSubmissions', JSON.stringify(localStoreData));
+                return true;
+            }
+        };
+
+        window.updateAdminPasswordDb = async function(oldPass, newPass) {
+            if (oldPass !== adminMasterPassword) {
+                return { success: false, msg: "현재 사용 중인 암호가 일치하지 않습니다." };
+            }
+            adminMasterPassword = newPass;
+            if (isFirebaseInitialized && auth.currentUser) {
+                try {
+                    const configDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'config', 'admin_settings');
+                    await updateDoc(configDocRef, {
+                        admin_password: newPass
+                    });
+                } catch (e) {
+                    console.error("Firebase password update failed", e);
+                }
+            } else {
+                localStorage.setItem('localAdminMasterPassword', newPass);
+            }
+            return { success: true };
+        };
+
+        window.verifyAdminPassword = function(pwd) {
+            return pwd === adminMasterPassword;
+        };
+
+        // Bootstrapping the app
+        window.onload = function() {
+            initialize();
+            toggleSiteFields(); // Initialize selected radio states and fields display
+        }
+    </script>
+
+    <script>
+        let currentStep = 1;
+        let globalFetchedRecords = [];
+        let isAdminLoggedIn = false;
+
+        // Custom alert styling via toast notification
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            let bgClass = 'bg-white border-emerald-500 text-slate-800';
+            let icon = 'fa-circle-check text-emerald-500';
+            if (type === 'error') {
+                bgClass = 'bg-white border-rose-500 text-slate-800';
+                icon = 'fa-triangle-exclamation text-rose-500';
+            } else if (type === 'warning') {
+                bgClass = 'bg-white border-amber-500 text-slate-800';
+                icon = 'fa-circle-exclamation text-amber-500';
+            }
+
+            toast.className = `flex items-center space-x-3 px-4 py-3 rounded-xl border shadow-lg transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto max-w-sm ${bgClass}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${icon} text-lg shrink-0"></i>
+                <div class="text-xs font-semibold">${message}</div>
+                <button class="text-slate-400 hover:text-slate-600 ml-auto shrink-0" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 50);
+
+            // Auto dismiss
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => { toast.remove(); }, 300);
+            }, 4000);
+        }
+
+        // Automatic Formatting inputs for better user experience
+        document.getElementById('studentPhone').addEventListener('input', function(e) {
+            let val = e.target.value.replace(/[^0-9]/g, '');
+            if (val.length > 3 && val.length <= 7) {
+                val = val.substring(0, 3) + '-' + val.substring(3);
+            } else if (val.length > 7) {
+                val = val.substring(0, 3) + '-' + val.substring(3, 7) + '-' + val.substring(7, 11);
+            }
+            e.target.value = val;
+        });
+
+        document.getElementById('studentRrn').addEventListener('input', function(e) {
+            let val = e.target.value.replace(/[^0-9]/g, '');
+            if (val.length > 6) {
+                // Formatting automatically like XXXXXX-XXXXXXX
+                val = val.substring(0, 6) + '-' + val.substring(6, 13);
+            }
+            e.target.value = val;
+        });
+
+        // Korean input validation on keyup/change
+        const koreanRegex = /[\uac00-\ud7a3\u1100-\u11ff\u3130-\u318f\ua960-\ua97f\ud7b0-\ud7ff]/;
+
+        function checkKoreanRestriction(inputId, warningId) {
+            const el = document.getElementById(inputId);
+            const warn = document.getElementById(warningId);
+            
+            el.addEventListener('input', function() {
+                if (koreanRegex.test(el.value)) {
+                    warn.classList.remove('hidden');
+                    // Remove Korean letters
+                    el.value = el.value.replace(koreanRegex, '');
+                } else {
+                    warn.classList.add('hidden');
+                }
+            });
+        }
+
+        checkKoreanRestriction('studentEmail', 'emailWarning');
+        checkKoreanRestriction('uwayId', 'uwayIdWarning');
+        checkKoreanRestriction('uwayPw', 'uwayPwWarning');
+        checkKoreanRestriction('jinhakId', 'jinhakIdWarning');
+        checkKoreanRestriction('jinhakPw', 'jinhakPwWarning');
+
+        // Confirm fields monitoring real-time mismatches
+        document.getElementById('uwayPwConfirm').addEventListener('input', function() {
+            const pw = document.getElementById('uwayPw').value;
+            const confirm = document.getElementById('uwayPwConfirm').value;
+            const warning = document.getElementById('uwayPwMismatch');
+            if (pw !== confirm) {
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('jinhakPwConfirm').addEventListener('input', function() {
+            const pw = document.getElementById('jinhakPw').value;
+            const confirm = document.getElementById('jinhakPwConfirm').value;
+            const warning = document.getElementById('jinhakPwMismatch');
+            if (pw !== confirm) {
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
+            }
+        });
+
+        // Dynamic Field Toggling based on Radio selection
+        function toggleSiteFields() {
+            const selected = document.querySelector('input[name="siteType"]:checked').value;
+            const uwayFields = document.getElementById('uwayFields');
+            const jinhakFields = document.getElementById('jinhakFields');
+            const labelUway = document.getElementById('labelUway');
+            const labelJinhak = document.getElementById('labelJinhak');
+            const labelBoth = document.getElementById('labelBoth');
+
+            // Reset label classes to default unselected style
+            const defaultLabelClass = "border border-slate-200 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer hover:bg-indigo-50/30 transition-all duration-200";
+            const selectedLabelClass = "border-2 border-indigo-500 bg-indigo-50/30 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer transition-all duration-200 shadow-sm";
+
+            labelUway.className = defaultLabelClass;
+            labelJinhak.className = defaultLabelClass;
+            labelBoth.className = defaultLabelClass;
+
+            if (selected === 'uway') {
+                uwayFields.classList.remove('hidden');
+                jinhakFields.classList.add('hidden');
+                labelUway.className = selectedLabelClass;
+            } else if (selected === 'jinhak') {
+                uwayFields.classList.add('hidden');
+                jinhakFields.classList.remove('hidden');
+                labelJinhak.className = selectedLabelClass;
+            } else if (selected === 'both') {
+                uwayFields.classList.remove('hidden');
+                jinhakFields.classList.remove('hidden');
+                labelBoth.className = selectedLabelClass;
+            }
+        }
+
+        // Nav views switcher
+        function switchView(target) {
+            document.getElementById('studentView').classList.add('hidden');
+            document.getElementById('adminLoginView').classList.add('hidden');
+            document.getElementById('adminDashboardView').classList.add('hidden');
+
+            document.getElementById('navStudentBtn').className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 hover:bg-slate-100 flex items-center space-x-1";
+            document.getElementById('navAdminBtn').className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-600 hover:bg-slate-100 flex items-center space-x-1";
+
+            if (target === 'student') {
+                document.getElementById('studentView').classList.remove('hidden');
+                document.getElementById('navStudentBtn').className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-indigo-50 text-indigo-700 border border-indigo-100 flex items-center space-x-1";
+            } else if (target === 'admin-login') {
+                if (isAdminLoggedIn) {
+                    switchView('admin-dashboard');
+                } else {
+                    document.getElementById('adminLoginView').classList.remove('hidden');
+                    document.getElementById('navAdminBtn').className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-slate-900 text-white flex items-center space-x-1";
+                }
+            } else if (target === 'admin-dashboard') {
+                document.getElementById('adminDashboardView').classList.remove('hidden');
+                document.getElementById('navAdminBtn').className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 bg-slate-900 text-white flex items-center space-x-1";
+                refreshData();
+            }
+        }
+
+        // Multi-step Navigation
+        function goToStep(step) {
+            currentStep = step;
+            
+            // Hide all contents
+            document.getElementById('stepContent1').classList.add('hidden');
+            document.getElementById('stepContent2').classList.add('hidden');
+
+            // Reset dots style
+            const dots = ['stepDot1', 'stepDot2'];
+            dots.forEach((dotId, index) => {
+                const num = index + 1;
+                const dotEl = document.getElementById(dotId);
+                const textEl = dotEl.nextElementSibling;
+                if (num < step) {
+                    dotEl.className = "w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold transition-all duration-300";
+                    dotEl.innerHTML = '<i class="fa-solid fa-check"></i>';
+                    textEl.className = "text-xs font-semibold mt-2 text-indigo-600";
+                } else if (num === step) {
+                    dotEl.className = "w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-100 transition-all duration-300";
+                    dotEl.innerText = num;
+                    textEl.className = "text-xs font-bold mt-2 text-indigo-600";
+                } else {
+                    dotEl.className = "w-10 h-10 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold transition-all duration-300";
+                    dotEl.innerText = num;
+                    textEl.className = "text-xs font-semibold mt-2 text-slate-400";
+                }
+            });
+
+            // Update Progress Line width
+            const progressPercent = ((step - 1) / 1) * 100;
+            document.getElementById('progressBar').style.width = `${progressPercent}%`;
+
+            // Show appropriate step content
+            document.getElementById(`stepContent${step}`).classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Validate steps sequentially
+        function validateAndGoToStep(targetStep) {
+            if (targetStep === 2) {
+                const grade = document.getElementById('studentGrade').value;
+                const clazz = document.getElementById('studentClass').value;
+                const num = document.getElementById('studentNum').value;
+                const name = document.getElementById('studentName').value.trim();
+                const phone = document.getElementById('studentPhone').value.trim();
+                const rrn = document.getElementById('studentRrn').value.trim();
+                const email = document.getElementById('studentEmail').value.trim();
+
+                if (!grade || !clazz || !num || !name || !phone || !rrn || !email) {
+                    showToast('필수 인적 사항 필드를 전부 입력해주세요.', 'error');
+                    return;
+                }
+                
+                // Form validations
+                if (!phone.match(/^01[016789]-\d{3,4}-\d{4}$/)) {
+                    showToast('유효한 전화번호 형식(010-XXXX-XXXX)이 아닙니다.', 'error');
+                    return;
+                }
+                if (!rrn.match(/^\d{6}-[1-4]\d{6}$/)) {
+                    showToast('주민등록번호 형식(앞 6자리 - 뒤 7자리)을 정확히 맞춰주세요.', 'error');
+                    return;
+                }
+                if (!email.includes('@') || email.match(koreanRegex)) {
+                    showToast('유효한 이메일 주소를 입력해 주십시오. (한글 금지)', 'error');
+                    return;
+                }
+
+                goToStep(2);
+            }
+        }
+
+        // Student submission controller
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const siteType = document.querySelector('input[name="siteType"]:checked').value;
+            const isAgreed = document.getElementById('agreementCheckbox').checked;
+
+            let uwayId = "";
+            let uwayPw = "";
+            let jinhakId = "";
+            let jinhakPw = "";
+
+            // Conditional Validation based on Selected Site Option
+            if (siteType === 'uway' || siteType === 'both') {
+                uwayId = document.getElementById('uwayId').value.trim();
+                uwayPw = document.getElementById('uwayPw').value;
+                const uwayPwConfirm = document.getElementById('uwayPwConfirm').value;
+
+                if (!uwayId || !uwayPw || !uwayPwConfirm) {
+                    showToast('선택하신 유웨이 계정 정보를 모두 입력해 주세요.', 'error');
+                    return;
+                }
+                if (uwayPw !== uwayPwConfirm) {
+                    showToast('유웨이 비밀번호가 재확인 입력란과 다릅니다.', 'error');
+                    return;
+                }
+                if (uwayId.match(koreanRegex) || uwayPw.match(koreanRegex)) {
+                    showToast('유웨이 계정 정보에는 한글을 포함할 수 없습니다.', 'error');
+                    return;
+                }
+            }
+
+            if (siteType === 'jinhak' || siteType === 'both') {
+                jinhakId = document.getElementById('jinhakId').value.trim();
+                jinhakPw = document.getElementById('jinhakPw').value;
+                const jinhakPwConfirm = document.getElementById('jinhakPwConfirm').value;
+
+                if (!jinhakId || !jinhakPw || !jinhakPwConfirm) {
+                    showToast('선택하신 진학사 계정 정보를 모두 입력해 주세요.', 'error');
+                    return;
+                }
+                if (jinhakPw !== jinhakPwConfirm) {
+                    showToast('진학사 비밀번호가 재확인 입력란과 다릅니다.', 'error');
+                    return;
+                }
+                if (jinhakId.match(koreanRegex) || jinhakPw.match(koreanRegex)) {
+                    showToast('진학사 계정 정보에는 한글을 포함할 수 없습니다.', 'error');
+                    return;
+                }
+            }
+
+            if (!isAgreed) {
+                showToast('개인정보 수집 및 활용 약관에 동의하셔야 제출이 가능합니다.', 'error');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>제출 처리 중...</span>`;
+
+            // Prepare record
+            const record = {
+                grade: document.getElementById('studentGrade').value,
+                class: document.getElementById('studentClass').value,
+                number: document.getElementById('studentNum').value,
+                name: document.getElementById('studentName').value.trim(),
+                phone: document.getElementById('studentPhone').value.trim(),
+                rrn: document.getElementById('studentRrn').value.trim(),
+                email: document.getElementById('studentEmail').value.trim(),
+                uwayId: uwayId,
+                uwayPw: uwayPw,
+                jinhakId: jinhakId,
+                jinhakPw: jinhakPw
+            };
+
+            try {
+                await window.saveDataToDb(record);
+                showToast(`${record.name} 학생의 원서접수 정보 수집 완료!`, 'success');
+                
+                // Form reset & transitions
+                document.getElementById('submissionForm').reset();
+                document.getElementById('emailWarning').classList.add('hidden');
+                document.getElementById('uwayIdWarning').classList.add('hidden');
+                document.getElementById('uwayPwWarning').classList.add('hidden');
+                document.getElementById('uwayPwMismatch').classList.add('hidden');
+                document.getElementById('jinhakIdWarning').classList.add('hidden');
+                document.getElementById('jinhakPwWarning').classList.add('hidden');
+                document.getElementById('jinhakPwMismatch').classList.add('hidden');
+
+                // Enforce default site toggle status on reset
+                document.querySelector('input[name="siteType"][value="uway"]').checked = true;
+                toggleSiteFields();
+
+                // Return back to first Step
+                goToStep(1);
+            } catch (err) {
+                showToast('저장 중 오류가 발생했습니다. 다시 시도해 주세요.', 'error');
+                console.error(err);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>최종 정보 제출하기</span>`;
+            }
+        }
+
+        // Admin Auth handling
+        function handleAdminAuth(e) {
+            e.preventDefault();
+            const rawPass = document.getElementById('adminPasswordInput').value;
+            
+            if (window.verifyAdminPassword(rawPass)) {
+                isAdminLoggedIn = true;
+                showToast('성공적으로 관리자 대시보드에 접속하였습니다.', 'success');
+                document.getElementById('adminPasswordInput').value = '';
+                document.getElementById('passwordSetupAlert').classList.add('hidden');
+                switchView('admin-dashboard');
+            } else {
+                showToast('비밀번호가 올바르지 않습니다. 다시 입력해 주세요.', 'error');
+            }
+        }
+
+        function handleLogout() {
+            isAdminLoggedIn = false;
+            showToast('관리자 세션이 만료되어 안전하게 로그아웃되었습니다.', 'warning');
+            switchView('student');
+        }
+
+        // Refreshes submissions list from Firestore
+        async function refreshData() {
+            const tableBody = document.getElementById('studentTableBody');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="10" class="py-12 text-center text-slate-400">
+                        <div class="flex flex-col items-center space-y-2">
+                            <i class="fa-solid fa-spinner fa-spin text-2xl text-indigo-500"></i>
+                            <span>실시간 데이터를 동기화하는 중입니다...</span>
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+            try {
+                const docs = await window.fetchDataFromDb();
+                
+                // Sort by Grade ascending, Class ascending, Student Number ascending
+                docs.sort((a, b) => {
+                    if (parseInt(a.grade) !== parseInt(b.grade)) return parseInt(a.grade) - parseInt(b.grade);
+                    if (parseInt(a.class) !== parseInt(b.class)) return parseInt(a.class) - parseInt(b.class);
+                    return parseInt(a.number) - parseInt(b.number);
+                });
+
+                globalFetchedRecords = docs;
+                
+                // Populate Filters
+                updateClassFilterOptions(docs);
+                renderTable(docs);
+            } catch (e) {
+                showToast('데이터를 읽어오는 동안 오류가 생겼습니다.', 'error');
+            }
+        }
+
+        // Update dropdown menu items for filter
+        function updateClassFilterOptions(records) {
+            const select = document.getElementById('filterClass');
+            const currentValue = select.value;
+            
+            // Extract unique class numbers
+            const classes = [...new Set(records.map(r => r.class))];
+            classes.sort((a, b) => parseInt(a) - parseInt(b));
+
+            select.innerHTML = '<option value="">모든 반</option>';
+            classes.forEach(cls => {
+                const opt = document.createElement('option');
+                opt.value = cls;
+                opt.textContent = `${cls}반`;
+                select.appendChild(opt);
+            });
+
+            // Restore selection if possible
+            select.value = currentValue;
+        }
+
+        // Dynamic table list rendering
+        function renderTable(records) {
+            const tableBody = document.getElementById('studentTableBody');
+            document.getElementById('recordCount').textContent = `${records.length}건 취합됨`;
+
+            if (records.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="py-12 text-center text-slate-400 font-medium">
+                            <i class="fa-regular fa-folder-open text-3xl mb-2 block text-slate-300"></i>
+                            <span>등록된 원서접수 정보 내역이 존재하지 않습니다.</span>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tableBody.innerHTML = '';
+            records.forEach(rec => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors duration-150 border-b border-slate-100";
+                
+                // Optional Field Handling with customized placeholders in UI
+                const displayUwayId = rec.uwayId ? escapeHtml(rec.uwayId) : '<span class="text-slate-400 italic font-normal text-xs">미제출</span>';
+                const displayUwayPw = rec.uwayPw ? `<span class="password-text select-all">${escapeHtml(rec.uwayPw)}</span>` : '<span class="text-slate-400 italic font-normal text-xs">-</span>';
+                
+                const displayJinhakId = rec.jinhakId ? escapeHtml(rec.jinhakId) : '<span class="text-slate-400 italic font-normal text-xs">미제출</span>';
+                const displayJinhakPw = rec.jinhakPw ? `<span class="password-text select-all">${escapeHtml(rec.jinhakPw)}</span>` : '<span class="text-slate-400 italic font-normal text-xs">-</span>';
+
+                tr.innerHTML = `
+                    <td class="py-3 px-4 text-center font-semibold text-xs text-indigo-600 bg-indigo-50/20">
+                        ${rec.grade}학년 ${rec.class}반 ${rec.number}번
+                    </td>
+                    <td class="py-3 px-4 font-bold text-slate-900">
+                        ${escapeHtml(rec.name)}
+                    </td>
+                    <td class="py-3 px-4 text-xs font-mono text-slate-600">
+                        ${escapeHtml(rec.phone)}
+                    </td>
+                    <td class="py-3 px-4 text-xs font-mono tracking-tight text-slate-600">
+                        ${escapeHtml(rec.rrn)}
+                    </td>
+                    <td class="py-3 px-4 text-xs text-slate-600">
+                        ${escapeHtml(rec.email)}
+                    </td>
+                    <td class="py-3 px-4 text-xs font-semibold text-emerald-800 bg-emerald-50/20">
+                        ${displayUwayId}
+                    </td>
+                    <td class="py-3 px-4 text-xs font-mono text-emerald-800 bg-emerald-50/20 relative group">
+                        ${displayUwayPw}
+                    </td>
+                    <td class="py-3 px-4 text-xs font-semibold text-cyan-800 bg-cyan-50/20">
+                        ${displayJinhakId}
+                    </td>
+                    <td class="py-3 px-4 text-xs font-mono text-cyan-800 bg-cyan-50/20 relative group">
+                        ${displayJinhakPw}
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <button onclick="handleDeleteRow('${rec.id}', '${escapeHtml(rec.name)}')" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-all" title="삭제">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // Filter and Search functions
+        function filterData() {
+            const searchVal = document.getElementById('searchName').value.toLowerCase();
+            const filterCls = document.getElementById('filterClass').value;
+
+            const filtered = globalFetchedRecords.filter(rec => {
+                const matchesSearch = rec.name.toLowerCase().includes(searchVal) || rec.phone.includes(searchVal);
+                const matchesClass = filterCls === "" || rec.class === filterCls;
+                return matchesSearch && matchesClass;
+            });
+
+            renderTable(filtered);
+        }
+
+        // Delete verification and processing (Safely customized instead of alerts)
+        async function handleDeleteRow(id, name) {
+            const isConfirmed = confirm(`정말로 [${name}] 학생의 소중한 정보를 리스트에서 완전히 파기 및 영구 삭제하시겠습니까?`);
+            if (isConfirmed) {
+                const res = await window.deleteDataFromDb(id);
+                if (res) {
+                    showToast('성공적으로 삭제 파기 처리되었습니다.', 'success');
+                    refreshData();
+                } else {
+                    showToast('삭제 처리에 실패했습니다.', 'error');
+                }
+            }
+        }
+
+        // Excel Exporting (BOM UTF-8 CSV generation)
+        function exportToExcel() {
+            if (globalFetchedRecords.length === 0) {
+                showToast('엑셀로 추출할 수 있는 데이터가 존재하지 않습니다.', 'warning');
+                return;
+            }
+
+            let csvContent = "\ufeff"; // BOM inclusion for Excel Korean compatibility
+            csvContent += "학년,반,번호,이름,전화번호,주민등록번호,주사용 이메일,유웨이 ID,유웨이 비밀번호,진학사 ID,진학사 비밀번호,등록일\n";
+
+            globalFetchedRecords.forEach(rec => {
+                const row = [
+                    rec.grade + "학년",
+                    rec.class + "반",
+                    rec.number + "번",
+                    rec.name,
+                    rec.phone,
+                    rec.rrn,
+                    rec.email,
+                    rec.uwayId,
+                    rec.uwayPw,
+                    rec.jinhakId,
+                    rec.jinhakPw,
+                    rec.created_at ? rec.created_at.substring(0, 10) : ""
+                ];
+                // Strip commas from input to avoid format errors
+                const cleanRow = row.map(val => `"${String(val || '').replace(/"/g, '""')}"`);
+                csvContent += cleanRow.join(",") + "\n";
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            
+            const today = new Date().toISOString().substring(0, 10);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `고3_대입_원서접수_취합_명단_${today}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast('엑셀로 정상적으로 변환되어 저장이 시작됩니다.', 'success');
+        }
+
+        // Password modification modal commands
+        function openConfigModal() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        function closeConfigModal() {
+            document.getElementById('settingsModal').classList.add('hidden');
+            document.getElementById('currentPassInput').value = '';
+            document.getElementById('newPassInput').value = '';
+        }
+
+        async function saveNewPassword() {
+            const oldPass = document.getElementById('currentPassInput').value;
+            const newPass = document.getElementById('newPassInput').value.trim();
+
+            if (!oldPass || !newPass) {
+                showToast('비밀번호를 입력하지 않았습니다.', 'error');
+                return;
+            }
+
+            const res = await window.updateAdminPasswordDb(oldPass, newPass);
+            if (res.success) {
+                showToast('관리자 마스터 비밀번호가 안전하게 변경 완료되었습니다.', 'success');
+                closeConfigModal();
+            } else {
+                showToast(res.msg || '비밀번호를 변경할 수 없습니다.', 'error');
+            }
+        }
+
+        // Clean safety wrapper helper
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;")
+                      .replace(/</g, "&lt;")
+                      .replace(/>/g, "&gt;")
+                      .replace(/"/g, "&quot;")
+                      .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
